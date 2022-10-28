@@ -26,7 +26,6 @@ import com.stringee.listener.StatusListener
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 
 class OutgoingCallActivity : AppCompatActivity(), OnClickListener {
     private lateinit var binding: ActivityCallBinding
@@ -183,18 +182,19 @@ class OutgoingCallActivity : AppCompatActivity(), OnClickListener {
                 runOnUiThread {
                     Log.d(Common.TAG, "onSignalingStateChange: $signalingState")
                     mSignalingState = signalingState
-                  if (player==null) {
-                        player = MediaPlayer.create(this@OutgoingCallActivity, R.raw.ringtone)
 
-                    }
-                    player.start()
+                    playringtone()
                     when (signalingState) {
                         SignalingState.CALLING -> binding.tvState.text = "Outgoing call"
                         SignalingState.RINGING -> binding.tvState.text = "Ringing"
                         SignalingState.ANSWERED -> {
                             binding.tvState.text = "Starting"
                             if (mMediaState == MediaState.CONNECTED) {
-                                player.release()
+                                if(player!=null){
+                                    player.release()
+                                    player==null
+                                }
+
                                 binding.tvState.text = "Started"
 
                                 //start the time
@@ -368,4 +368,16 @@ class OutgoingCallActivity : AppCompatActivity(), OnClickListener {
         }
         return "$time"
     }
+
+    fun playringtone(){
+        if (player == null) {
+            player = MediaPlayer.create(this, R.raw.ringtone)
+            player.setOnCompletionListener {
+                if (player != null) {
+                    player.release()
+                    player == null
+            }
+        }
+    }
+}
 }
